@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ import joptsimple.OptionSet;
 public class UDPServer {
 
     private static final Logger logger = LoggerFactory.getLogger(UDPServer.class);
-    private String directory = "C:/Users/Cedric Paradis/Documents/";
+    private String directory;
     private static final int DATA = 0;
     private static final int SYN = 1;
     private static final int SYNACK = 2;
@@ -40,6 +41,14 @@ public class UDPServer {
     private static final int FIN = 5;
     
     HashMap<Long,String> finalResponse = new LinkedHashMap<>();
+
+	/*
+	Constructor for UDPServer
+	 */
+
+	public UDPServer(String directory, boolean verbose){
+	this.directory = directory;
+	}
     
    
     		/*
@@ -163,6 +172,8 @@ public class UDPServer {
     	String file = separator[1].replace("HTTP/1.0","");
         
         if(file.length() > 1) {
+			int length = file.length();
+			System.out.println(length);
 			file = file.startsWith("/") ? file.substring(1) : file;
 		}
     	 if(method.equals("GET")) {
@@ -371,10 +382,15 @@ public class UDPServer {
         parser.acceptsAll(asList("port", "p"), "Listening port")
                 .withOptionalArg()
                 .defaultsTo("8007");
-
-        OptionSet opts = parser.parse(args);
-        int port = Integer.parseInt((String) opts.valueOf("port"));
-        UDPServer server = new UDPServer();
+		boolean verbose = false;
+		String dir = "";
+		OptionSpec<String> dir_arg = parser.accepts("d").withRequiredArg().ofType(String.class);
+		OptionSpec<Void> verbose_args = parser.accepts("v");
+		OptionSet opts = parser.parse(args);
+		int port = Integer.parseInt((String) opts.valueOf("port"));
+		verbose = opts.has(verbose_args);
+		dir = opts.valueOf(dir_arg);
+        UDPServer server = new UDPServer(dir, verbose);
         server.listenAndServe(port);
     }
 }
